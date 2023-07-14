@@ -33,6 +33,7 @@ const getUserById = (req, res) => {
 
 // создание пользователя
 const createUser = (req, res) => {
+  console.log(req.user._id);
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => res.status(201).send(user))
