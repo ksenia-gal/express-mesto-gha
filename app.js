@@ -1,12 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
 const routes = require('./routes/router');
-
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
 
 // создание приложения
 const app = express();
+
+app.use(helmet());
 
 app.use(express.json());
 
