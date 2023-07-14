@@ -20,10 +20,6 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
 });
 
-app.get('/', (req, res) => {
-  res.send('hello');
-});
-
 app.listen(PORT, () => {
   // если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`);
