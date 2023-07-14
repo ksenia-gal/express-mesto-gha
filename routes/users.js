@@ -10,10 +10,10 @@ const {
 
 // возвращает всех пользователей из базы данных
 router.get('/', getUsers);
-// возвращает пользователя по переданному _id
-router.get('/:userId', getUserById);
 // создает пользователя
 router.post('/', createUser);
+// возвращает пользователя по переданному _id
+router.get('/:userId', getUserById);
 // обновляет аватар пользователя
 router.patch('/me/avatar', changeUserAvatar);
 // редактирует данные пользователя
