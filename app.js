@@ -18,7 +18,6 @@ app.use((req, res, next) => {
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
-  // useUnifiedTopology: false
 });
 
 app.get('/', (req, res) => {
@@ -26,6 +25,6 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  // Если всё работает, консоль покажет, какой порт приложение слушает
+  // если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`);
 });
