@@ -62,13 +62,11 @@ const changeUserAvatar = (req, res) => {
           message: 'Переданы некорректные данные при обновлении аватара',
         });
       }
-
       if (err.name === 'DocumentNotFoundError') {
         return res.status(404).send({
           message: 'Запрашиваемый пользователь не найден',
         });
       }
-
       return res.status(500).send({
         message: 'Произошла ошибка, сервер не смог обработать запрос',
       });
