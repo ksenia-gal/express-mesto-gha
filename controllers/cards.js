@@ -1,4 +1,7 @@
 const Card = require('../models/card');
+// const ForbiddenError = require('../errors/forbiddenError');
+// const NotFoundError = require('../errors/notFoundError');
+// const BadRequestError = require('../errors/badRequestError');
 
 // добавление массива карточек на страницу
 const getCards = (req, res) => {
@@ -10,13 +13,12 @@ const getCards = (req, res) => {
 };
 
 // создание новой карточки
-const createCard = (req, res) => {
-  console.log(req.user._id);
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.status(201).send(card))
+    .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         res.status(400).send({
           message: 'Произошла ошибка при создании новой карточки, переданы некорректные данные',
         });
