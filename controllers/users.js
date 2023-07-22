@@ -4,6 +4,7 @@ const User = require('../models/user');
 const ForbiddenError = require('../errors/forbiddenError');
 const NotFoundError = require('../errors/notFoundError');
 const BadRequestError = require('../errors/badRequestError');
+const ConflictError = require('../errors/conflictError');
 
 const login = (req, res) => {
   const { email, password } = req.body;
@@ -75,40 +76,33 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send(user))
+    .then((user) => res.send(user.toJSON()))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({
-          message:
-            'Переданы некорректные данные при создании пользователя',
-        });
-      } else {
-        next(err);
+      if (err.name === 'MongoError' && err.code === 11000) {
+        throw new ConflictError('Пользователь с таким email уже существует');
       }
-    });
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+      }
+    })
+    .catch(next);
 };
 
 // обновление аватара пользователя
-const changeUserAvatar = (req, res) => {
+const changeUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .orFail()
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(400).send({
-          message: 'Переданы некорректные данные при обновлении аватара',
-        });
+        throw new BadRequestError('Переданы некорректные данные при обновлении аватара');
       }
       if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({
-          message: 'Запрашиваемый пользователь не найден',
-        });
+        next(new NotFoundError('Запрашиваемый пользователь не найден'));
       }
-      return res.status(500).send({
-        message: 'Произошла ошибка, сервер не смог обработать запрос',
-      });
-    });
+    })
+    .catch(next);
 };
 
 // редактирование данных пользователя
