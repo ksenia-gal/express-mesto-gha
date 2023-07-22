@@ -25,7 +25,7 @@ const login = (req, res) => {
     });
 };
 
-// получение всех пользователей из базы данных
+// получение всех пользователей из базы данных +
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
@@ -67,7 +67,7 @@ const getCurrentUser = (req, res, next) => {
 };
 
 // создание пользователя
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -75,7 +75,7 @@ const createUser = (req, res) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({
@@ -83,9 +83,7 @@ const createUser = (req, res) => {
             'Переданы некорректные данные при создании пользователя',
         });
       } else {
-        res.status(500).send({
-          message: 'Произошла ошибка, сервер не смог обработать запрос',
-        });
+        next(err);
       }
     });
 };
@@ -114,7 +112,7 @@ const changeUserAvatar = (req, res) => {
 };
 
 // редактирование данных пользователя
-const changeUserInfo = (req, res) => {
+const changeUserInfo = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -122,23 +120,16 @@ const changeUserInfo = (req, res) => {
     { new: true, runValidators: true },
   )
     .orFail()
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(400).send({
-          message:
-            'Переданы некорректные данные при редактировании данных профиля',
-        });
+        throw new BadRequestError('Переданы некорректные данные при редактировании данных профиля');
       }
       if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({
-          message: 'Запрашиваемый пользователь не найден',
-        });
+        next(new NotFoundError('Запрашиваемый пользователь не найден'));
       }
-      return res.status(500).send({
-        message: 'Произошла ошибка, сервер не смог обработать запрос',
-      });
-    });
+    })
+    .catch(next);
 };
 
 module.exports = {
