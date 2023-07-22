@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const { errors } = require('celebrate');
 const routes = require('./routes/router');
 const errorsHandler = require('./middlewares/errorsHandler');
+const cookieParser = require('cookie-parser');
 //const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 // Слушаем 3000 порт
@@ -15,6 +16,8 @@ const app = express();
 app.use(helmet());
 
 app.use(express.json());
+
+app.use(cookieParser());
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 

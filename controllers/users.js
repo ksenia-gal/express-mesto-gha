@@ -1,3 +1,5 @@
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 const bcrypt = require('bcryptjs'); // импортируем bcrypt
 const jwt = require('jsonwebtoken'); // импортируем модуль jsonwebtoken
 const User = require('../models/user');
@@ -5,26 +7,6 @@ const ForbiddenError = require('../errors/forbiddenError');
 const NotFoundError = require('../errors/notFoundError');
 const BadRequestError = require('../errors/badRequestError');
 const ConflictError = require('../errors/conflictError');
-
-const login = (req, res) => {
-  const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
-    .then((user) => {
-      // создадим токен
-      const token = jwt.sign(
-        { _id: user._id },
-        'some-secret-key',
-        { expiresIn: '7d' },
-      );
-        // вернем токен
-      res.send({ token });
-    })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
-};
 
 // получение всех пользователей из базы данных +
 const getUsers = (req, res, next) => {
@@ -122,6 +104,45 @@ const changeUserInfo = (req, res, next) => {
       if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Запрашиваемый пользователь не найден'));
       }
+    })
+    .catch(next);
+};
+
+// const login = (req, res, next) => {
+//   const { email, password } = req.body;
+//   User.findUserByCredentials(email, password)
+//     .then((user) => {
+//       const token = jwt.sign(
+//         { _id: user._id },
+//         NODE_ENV === 'production' ? JWT_SECRET : 'secret-key',
+//         { expiresIn: '7d' },
+//       );
+//       res
+//         .cookie('token', token, {
+//           maxAge: 3600000 * 24 * 7,
+//           httpOnly: true,
+//         })
+//         .send({ token });
+//     })
+//     .catch(next);
+// };
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      // создадим токен
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'secret-key',
+        { expiresIn: '7d' },
+      );
+        // вернем токен
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+      })
+        .send({ token });
     })
     .catch(next);
 };
