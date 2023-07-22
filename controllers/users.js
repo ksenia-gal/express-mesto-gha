@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs'); // импортируем bcrypt
 const jwt = require('jsonwebtoken'); // импортируем модуль jsonwebtoken
 const User = require('../models/user');
+const ForbiddenError = require('../errors/forbiddenError');
+const NotFoundError = require('../errors/notFoundError');
+const BadRequestError = require('../errors/badRequestError');
 
 const login = (req, res) => {
   const { email, password } = req.body;
@@ -23,55 +26,43 @@ const login = (req, res) => {
 };
 
 // получение всех пользователей из базы данных
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res
-      .status(500)
-      .send({ message: 'Произошла ошибка, сервер не смог обработать запрос' }));
+    .catch(next);
 };
 
 // получение конкретного пользователя по id
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail()
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({
-          message: 'Передан некорректный id пользователя',
-        });
+        next(new BadRequestError('Передан некорректный id пользователя'));
       }
       if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({
-          message: 'Запрашиваемый пользователь не найден',
-        });
+        next(new NotFoundError('Запрашиваемый пользователь не найден'));
+      } else {
+        next(err);
       }
-      return res.status(500).send({
-        message: 'Произошла ошибка, сервер не смог обработать запрос',
-      });
     });
 };
 
 // получение текущего пользователя
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .orFail()
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({
-          message: 'Передан некорректный id пользователя',
-        });
+        next(new BadRequestError('Передан некорректный id пользователя'));
       }
       if (err.name === 'DocumentNotFoundError') {
-        return res.status(404).send({
-          message: 'Запрашиваемый пользователь не найден',
-        });
+        next(new NotFoundError('Запрашиваемый пользователь не найден'));
+      } else {
+        next(err);
       }
-      return res.status(500).send({
-        message: 'Произошла ошибка, сервер не смог обработать запрос',
-      });
     });
 };
 

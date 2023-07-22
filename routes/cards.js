@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
-// // const { ObjectId } = require('mongoose').Types;
+const { ObjectId } = require('mongoose').Types;
 const validator = require('validator');
 
 const {
@@ -24,10 +24,37 @@ router.post('/', celebrate({
   }),
 }), createCard);
 // удаляет карточку по идентификатору
-router.delete('/:cardId', deleteCard);
+router.delete('/:cardId', celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string()
+      .required()
+      .custom((value, helpers) => {
+        if (ObjectId.isValid(value)) return value;
+        return helpers.message('Невалидный id');
+      }),
+  }),
+}), deleteCard);
 // ставит лайк карточке
-router.put('/:cardId/likes', putLike);
+router.put('/:cardId/likes', celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string()
+      .required()
+      .custom((value, helpers) => {
+        if (ObjectId.isValid(value)) return value;
+        return helpers.message('Невалидный id');
+      }),
+  }),
+}), putLike);
 // удаляет лайк с карточки:
-router.delete('/:cardId/likes', deleteLike);
+router.delete('/:cardId/likes', celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string()
+      .required()
+      .custom((value, helpers) => {
+        if (ObjectId.isValid(value)) return value;
+        return helpers.message('Невалидный id');
+      }),
+  }),
+}), deleteLike);
 
 module.exports = router;
