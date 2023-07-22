@@ -3,7 +3,7 @@ const AuthorizationError = require('../errors/unauthorisedError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-module.exports = (req, res, next) => {
+const auth = (req, res, next) => {
   // достаём авторизационный заголовок
   const { authorization } = req.headers;
 
@@ -27,3 +27,5 @@ module.exports = (req, res, next) => {
 
   return next(); // пропускаем запрос дальше
 };
+
+module.exports = auth;
