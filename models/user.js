@@ -44,41 +44,41 @@ const userSchema = new mongoose.Schema(
   { versionKey: false },
 );
 
-// поиск пользователя в базе по введенным данным
-userSchema.statics.findUserByCredentials = function getUserIfAuth(email, password) {
-  return this.findOne({ email }).select('+password')
-    .then((user) => {
-      if (!user) {
-        return Promise.reject(new AuthorisationError('Неверный логин или пароль'));
-      }
-      return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            return Promise.reject(new AuthorisationError('Неверный логин или пароль'));
-          }
-          return user;
-        });
-    });
-};
-// // NEW AND NOT READY
-// userSchema.statics.findUserByCredentials = function (email, password) {
-//   // попытаемся найти пользователя по почте
-//   return this.findOne({ email }).select('+password') // this — это модель User
+// // поиск пользователя в базе по введенным данным
+// userSchema.statics.findUserByCredentials = function getUserIfAuth(email, password) {
+//   return this.findOne({ email }).select('+password')
 //     .then((user) => {
-//       // не нашёлся — отклоняем промис
 //       if (!user) {
-//         throw new AuthorisationError('Неправильные почта или пароль');
+//         return Promise.reject(new AuthorisationError('Неверный логин или пароль'));
 //       }
-
-//       // нашёлся — сравниваем хеши
 //       return bcrypt.compare(password, user.password)
 //         .then((matched) => {
 //           if (!matched) {
-//             throw new AuthorisationError('Неправильные почта или пароль');
+//             return Promise.reject(new AuthorisationError('Неверный логин или пароль'));
 //           }
-
 //           return user;
 //         });
 //     });
 // };
+// NEW AND NOT READY
+userSchema.statics.findUserByCredentials = function (email, password) {
+  // попытаемся найти пользователя по почте
+  return this.findOne({ email }).select('+password') // this — это модель User
+    .then((user) => {
+      // не нашёлся — отклоняем промис
+      if (!user) {
+        throw new AuthorisationError('Неправильные почта или пароль');
+      }
+
+      // нашёлся — сравниваем хеши
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            throw new AuthorisationError('Неправильные почта или пароль');
+          }
+
+          return user;
+        });
+    });
+};
 module.exports = mongoose.model('user', userSchema);
