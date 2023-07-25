@@ -80,10 +80,14 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send(user.toJSON()))
+    .then((user) => res.send({
+      data: {
+        name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+      },
+    }))
     .catch((err) => {
-      if (err.name === 'MongoError' && err.code === 11000) {
-        next(new ConflictError('Пользователь с таким email уже существует'));
+      if (err.code === 11000) {
+        throw new ConflictError('Пользователь с таким email уже существует');
       } else
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
