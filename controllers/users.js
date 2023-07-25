@@ -10,7 +10,7 @@ const AuthorizationError = require('../errors/unauthorisedError');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       // создадим токен
       const token = jwt.sign(
