@@ -26,7 +26,7 @@ const createCard = (req, res, next) => {
 // удаление карточки
 const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
-    .orFail()
+    .orFail(new NotFoundError('Карточка с указанным _id не найдена'))
     .catch(() => {
       throw new NotFoundError('Запрашиваемая карточка не найдена');
     })
