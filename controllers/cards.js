@@ -26,22 +26,42 @@ const createCard = (req, res, next) => {
 // удаление карточки
 const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
-    .orFail()
+    .orFail(new NotFoundError('Запрашиваемая карточка не найдена'))
     .then((card) => {
-      if (String(card.owner) === String(req.user._id)) {
-        Card.findByIdAndRemove(req.params.cardId)
-          .then((cardData) => res.send(cardData));
-      } else {
+      if (String(card.owner) !== String(req.user._id)) {
         throw new ForbiddenError('Недостаточно прав');
       }
+      card.remove();
+      res.send({ message: 'Карточка удалена' });
     })
     .catch((err) => {
-      if (err.name === 'NotFound') {
-        throw new NotFoundError('Запрашиваемая карточка не найдена');
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Произошла ошибка при удалении карточки, переданы некорректные данные'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
+// // удаление карточки
+// const deleteCard = (req, res, next) => {
+//   Card.findByIdAndRemove(req.params.cardId)
+//     // .orFail(new NotFoundError('Запрашиваемая карточка не найдена'))
+//     .then((card) => {
+//       if (!card) {
+//         throw new NotFoundError('Запрашиваемая карточка не найдена');
+//       }
+//       return res.send(card);
+//     })
+//     .catch((err) => {
+//       if (err.name === 'CastError') {
+//         next(new BadRequestError('Произошла ошибка при удалении карточки, переданы некорректные данные'));
+// }
+//   if (String(card.owner) !== String(req.user._id)) {
+//     next(new ForbiddenError('Недостаточно прав'));
+// }
+// })
+//     .catch(next);
+// };
 
 // добавление лайка
 const putLike = (req, res, next) => {
