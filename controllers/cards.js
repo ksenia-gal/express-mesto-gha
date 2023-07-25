@@ -26,13 +26,18 @@ const createCard = (req, res, next) => {
 // удаление карточки
 const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
-    .orFail(new NotFoundError('Запрашиваемая карточка не найдена'))
+    .orFail()
     .then((card) => {
       if (String(card.owner) === String(req.user._id)) {
         Card.findByIdAndRemove(req.params.cardId)
           .then((cardData) => res.send(cardData));
       } else {
         throw new ForbiddenError('Недостаточно прав');
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'NotFound') {
+        throw new NotFoundError('Запрашиваемая карточка не найдена');
       }
     })
     .catch(next);
