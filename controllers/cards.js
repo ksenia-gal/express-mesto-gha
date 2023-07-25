@@ -1,9 +1,7 @@
-const badRequestError = require('../errors/badRequestError');
 const Card = require('../models/card');
-// const ForbiddenError = require('../errors/forbiddenError');
-// const NotFoundError = require('../errors/notFoundError');
 const BadRequestError = require('../errors/badRequestError');
 const NotFoundError = require('../errors/unauthorisedError');
+const ForbiddenError = require('../errors/forbiddenError');
 
 // добавление массива карточек на страницу
 const getCards = (req, res, next) => {
@@ -27,12 +25,14 @@ const createCard = (req, res, next) => {
 
 // удаление карточки
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
+    .orFail(new NotFoundError('Запрашиваемая карточка не найдена'))
     .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Запрашиваемая карточка не найдена');
+      if (String(card.owner) !== String(req.user._id)) {
+        throw new ForbiddenError('Недостаточно прав для удаления');
       }
-      return res.send(card);
+      card.remove();
+      res.send({ message: 'Карточка удалена'});
     })
     .catch((err) => {
       if (err.name === 'CastError') {
