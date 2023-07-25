@@ -1,5 +1,6 @@
 const { celebrate, Joi } = require('celebrate');
 const router = require('express').Router();
+const validator = require('validator');
 const auth = require('../middlewares/auth');
 const userRouter = require('./users');
 const cardRouter = require('./cards');
@@ -10,11 +11,20 @@ const NotFoundError = require('../errors/notFoundError');
 // роут регистрации
 router.post('/signup', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(4),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string(),
+    avatar: Joi.string()
+      .custom((value, helpers) => {
+        if (validator.isURL(value)) return value;
+        return helpers.message('Неверный формат ссылки на изображение');
+      }),
+    email: Joi.string()
+      .required()
+      .custom((value, helpers) => {
+        if (validator.isEmail(value)) return value;
+        return helpers.message('Неверный формат почты');
+      }),
+    password: Joi.string().required().min(4),
   }),
 }), createUser);
 // роут для логина
