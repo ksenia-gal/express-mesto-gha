@@ -26,17 +26,16 @@ const createCard = (req, res, next) => {
 // удаление карточки
 const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
-    .orFail(new NotFoundError('Запрашиваемая карточка не найдена'))
-    .then((card) => {
-      if (String(card.owner) !== String(req.user._id)) {
-        throw new ForbiddenError('Недостаточно прав для удаления');
-      }
-      card.remove();
-      res.send({ message: 'Карточка удалена'});
+    .orFail()
+    .catch(() => {
+      throw new NotFoundError('Запрашиваемая карточка не найдена');
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Произошла ошибка при удалении карточки, переданы некорректные данные');
+    .then((card) => {
+      if (String(card.owner) === String(req.user._id)) {
+        Card.findByIdAndRemove(req.params.cardId)
+          .then((cardData) => res.send(cardData));
+      } else {
+        throw new ForbiddenError('Недостаточно прав');
       }
     })
     .catch(next);
