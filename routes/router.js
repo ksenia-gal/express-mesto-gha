@@ -30,7 +30,12 @@ router.post('/signup', celebrate({
 // роут для логина
 router.post('/signin', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().email(),
+    email: Joi.string()
+      .required()
+      .custom((value, helpers) => {
+        if (validator.isEmail(value)) return value;
+        return helpers.message('Неверный формат почты');
+      }),
     password: Joi.string().required().min(4),
   }),
 }), login);
