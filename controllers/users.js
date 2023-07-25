@@ -11,10 +11,10 @@ const AuthorizationError = require('../errors/unauthorisedError');
 const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
-    .then((user) => {
+    .then(({ _id: userId }) => {
       // создадим токен
       const token = jwt.sign(
-        { _id: user._id },
+        { userId },
         NODE_ENV === 'production' ? JWT_SECRET : 'secret-key',
         { expiresIn: '7d' },
       );
@@ -23,7 +23,7 @@ const login = (req, res, next) => {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
       })
-        .send({ token });
+        .send({ _id: token });
     })
     .catch(() => {
       next(new AuthorizationError('Неправильные почта или пароль'));
