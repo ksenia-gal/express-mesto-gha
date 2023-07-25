@@ -24,24 +24,23 @@ const createCard = (req, res, next) => {
 };
 
 // удаление карточки
-const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+const deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+        throw new BadRequestError('Запрашиваемая карточка не найдена');
       }
-      return res.status(200).send(card);
+      if (String(card.owner) !== String(req.user._id)) {
+        throw new ForbiddenError('Недостаточно прав');
+      }
+      return Card.findByIdAndRemove(req.params.cardId);
     })
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({
-          message: 'Произошла ошибка при удалении карточки, переданы некорректные данные',
-        });
+        next(new BadRequestError('Произошла ошибка при удалении карточки, переданы некорректные данные'));
       } else {
-        res
-          .status(500).send({
-            message: 'Произошла ошибка, сервер не смог обработать запрос',
-          });
+        next(err);
       }
     });
 };
