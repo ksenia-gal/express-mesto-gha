@@ -23,25 +23,42 @@ const createCard = (req, res, next) => {
     .catch(next);
 };
 
-// удаление карточки
 const deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
-    .orFail(new NotFoundError('Запрашиваемая карточка не найдена'))
+  Card.findById(req.params)
+    .orFail()
+    .catch(() => {
+      throw new NotFoundError('Запрашиваемая карточка не найдена');
+    })
     .then((card) => {
-      if (String(card.owner) !== String(req.user._id)) {
+      if (card.owner.toString() === req.user._id) {
+        Card.findByIdAndRemove(req.params)
+          .then((cardData) => res.send(cardData));
+      } else {
         throw new ForbiddenError('Недостаточно прав');
       }
-      card.remove();
-      res.send({ message: 'Карточка удалена' });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Произошла ошибка при удалении карточки, переданы некорректные данные'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
+
+// // удаление карточки
+// const deleteCard = (req, res, next) => {
+//   Card.findById(req.params.cardId)
+//     .orFail(new NotFoundError('Запрашиваемая карточка не найдена'))
+//     .then((card) => {
+//       if (String(card.owner) !== String(req.user._id)) {
+//         throw new ForbiddenError('Недостаточно прав');
+//       }
+//       card.remove();
+//       res.send({ message: 'Карточка удалена' });
+//     })
+//     .catch((err) => {
+//       if (err.name === 'CastError') {
+//         next(new BadRequestError('Произошла ошибка при удалении карточки, переданы некорректные данные'));
+//       } else {
+//         next(err);
+//       }
+//     });
+// };
 // // удаление карточки
 // const deleteCard = (req, res, next) => {
 //   Card.findByIdAndRemove(req.params.cardId)
