@@ -18,10 +18,9 @@ const createCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Произошла ошибка при создании новой карточки, переданы некорректные данные');
-      } else {
-        next(err);
       }
-    });
+    })
+    .catch(next);
 };
 
 // удаление карточки
