@@ -51,10 +51,8 @@ const putLike = (req, res, next) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail(() => {
-      throw new NotFoundError('Карточка с таким id не найдена');
-    })
-    .then((card) => res.status(200).send(card))
+    .orFail(new NotFoundError('Карточка с таким id не найдена'))
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
         throw new NotFoundError('Запрашиваемая карточка не найдена');
