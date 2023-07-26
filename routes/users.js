@@ -17,7 +17,7 @@ router.get('/me', getCurrentUser);
 // возвращает пользователя по переданному _id
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().required(),
+    userId: Joi.string().length(24).hex().required(),
   }),
 }), getUserById);
 // обновляет аватар пользователя
