@@ -1,7 +1,6 @@
-// require('dotenv').config();
-
 const express = require('express');
 const helmet = require('helmet');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
@@ -20,6 +19,8 @@ app.use(helmet());
 app.use(express.json());
 
 app.use(cookieParser());
+
+app.use(bodyParser.json());
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 

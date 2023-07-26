@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
-const validator = require('validator');
+const { REGEX } = require('../utils/constants');
 
 const {
   getCards,
@@ -16,11 +16,7 @@ router.get('/', getCards);
 router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string()
-      .custom((value, helpers) => {
-        if (validator.isURL(value)) return value;
-        return helpers.message('Некорректный URL');
-      }),
+    link: Joi.string().required().pattern(REGEX),
   }),
 }), createCard);
 
