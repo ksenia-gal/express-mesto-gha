@@ -45,24 +45,56 @@ const deleteCard = (req, res, next) => {
     });
 };
 
-// добавление лайка
-const putLike = (req, res, next) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $addToSet: { likes: req.user.userId } }, // добавить _id в массив, если его там нет
-    { new: true },
-  )
-    .then((card) => {
-      if (card) return res.send(card);
-      throw new NotFoundError('Запрашиваемая карточка не найдена');
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new BadRequestError('Произошла ошибка при добавлении лайка, переданы некорректные данные'));
-      }
-    })
-    .catch(next);
-};
+// // добавление лайка
+// const putLike = (req, res, next) => {
+//   Card.findByIdAndUpdate(
+//     req.params.cardId,
+//     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+//     { new: true },
+//   )
+//     .orFail()
+//     .then((card) => res.status(200).send(card))
+//     .catch((err) => {
+//       if (err.name === 'DocumentNotFoundError') {
+//         throw new NotFoundError('Запрашиваемая карточка не найдена');
+//       }
+//       if (err.name === 'CastError') {
+//         throw new BadRequestError('Произошла ошибка при добавлении лайка, переданы некорректные данные');
+//       }
+//     })
+//     .catch(next);
+// };
+
+// Лайк на карточки:
+function putLike(req, res, next) {
+  const { cardId } = req.params;
+  const { userId } = req.user;
+ 
+  Card
+    .findByIdAndUpdate(
+      cardId,
+      {
+        $addToSet: {
+          likes: userId,
+        },
+      },
+      {
+        new: true,
+      },
+    )
+    .then((card) => {
+      if (card) return res.send({ data: card });
+ 
+      throw new NotFoundError('Карточка с указанным id не найдена');
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new BadRequestError('Переданы некорректные данные при добавлении лайка карточке'));
+      } else {
+        next(err);
+      }
+    });
+}
 
 // удаление лайка
 const deleteLike = (req, res, next) => {
