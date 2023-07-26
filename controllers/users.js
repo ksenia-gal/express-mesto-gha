@@ -6,7 +6,7 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/notFoundError');
 const BadRequestError = require('../errors/badRequestError');
 const ConflictError = require('../errors/conflictError');
-// const AuthorizationError = require('../errors/unauthorisedError');
+const AuthorizationError = require('../errors/unauthorisedError');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -24,7 +24,7 @@ const login = (req, res, next) => {
         httpOnly: true,
       })
         .send({ token });
-      // throw new AuthorizationError('Неправильные почта или пароль');
+      throw new AuthorizationError('Неправильные почта или пароль');
     })
     .catch(next);
 };
