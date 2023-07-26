@@ -52,14 +52,13 @@ const putLike = (req, res, next) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail()
-    .then((card) => res.status(200).send(card))
+    .then((card) => {
+      if (card) return res.send(card);
+      throw new NotFoundError('Запрашиваемая карточка не найдена');
+    })
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        throw new NotFoundError('Запрашиваемая карточка не найдена');
-      }
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Произошла ошибка при добавлении лайка, переданы некорректные данные');
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new BadRequestError('Произошла ошибка при добавлении лайка, переданы некорректные данные'));
       }
     })
     .catch(next);
