@@ -17,11 +17,11 @@ router.get('/', getCards);
 router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string()
-    .custom((value, helpers) => {
-      if (validator.isURL(value)) return value;
-      return helpers.message('Неверный формат ссылки на изображение');
-    }),
+    link: Joi.string().required
+      .custom((value, helpers) => {
+        if (validator.isURL(value)) return value;
+        return helpers.message('Некорректный URL');
+      }),
   }),
 }), createCard);
 
