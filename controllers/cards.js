@@ -51,17 +51,15 @@ const putLike = (req, res, next) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail(new NotFoundError('Карточка с таким id не найдена'))
+    .orFail(new NotFoundError('Запрашиваемая карточка не найдена'))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        throw new NotFoundError('Запрашиваемая карточка не найдена');
-      }
       if (err.name === 'CastError') {
-        throw new BadRequestError('Произошла ошибка при добавлении лайка, переданы некорректные данные');
+        next(new BadRequestError('Произошла ошибка при добавлении лайка, переданы некорректные данные'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 // удаление лайка
