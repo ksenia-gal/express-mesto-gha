@@ -1,7 +1,7 @@
 const Card = require('../models/card');
 const ForbiddenError = require('../errors/forbiddenError');
 const BadRequestError = require('../errors/badRequestError');
-const NotFoundError = require('../errors/unauthorisedError');
+const NotFoundError = require('../errors/notFoundError');
 
 // добавление массива карточек на страницу
 const getCards = (req, res, next) => {
@@ -52,20 +52,18 @@ const putLike = (req, res, next) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail()
     .then((card) => {
-      if (card) return res.send({ data: card });
-
-      throw new NotFoundError('Карточка с указанным id не найдена');
+      if (card) return res.send(card);
+      throw new NotFoundError('Запрашиваемая карточка не найдена');
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные при добавлении лайка карточке'));
+        next(new BadRequestError('Произошла ошибка при добавлении лайка, переданы некорректные данные'));
       } else {
         next(err);
       }
     });
-}
+};
 
 // удаление лайка
 const deleteLike = (req, res, next) => {

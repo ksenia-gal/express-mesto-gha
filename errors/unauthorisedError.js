@@ -1,10 +1,10 @@
 const { UNAUTHORISED } = require('./errorsStatusCode');
 
-class NotFoundError extends Error {
+class UnauthorizedError extends Error {
   constructor(message) {
     super(message);
     this.statusCode = UNAUTHORISED;
   }
 }
 
-module.exports = NotFoundError;
+module.exports = UnauthorizedError;
