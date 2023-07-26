@@ -13,9 +13,3 @@ const errorHandler = (err, req, res, next) => {
 };
 
 module.exports = { errorHandler };
-
-// const handleErrors = (err, req, res, next) => {
-//   res.status(err.statusCode).send({ message: err.message });
-// };
-
-// module.exports = handleErrors;
