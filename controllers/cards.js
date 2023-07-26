@@ -35,13 +35,14 @@ const deleteCard = (req, res, next) => {
       }
       return Card.findByIdAndRemove(req.params.cardId);
     })
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Карточка уже была удалена');
+    .then((card) => res.send(card))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new NotFoundError('Произошла ошибка при удалении карточки, переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      res.send(card);
-    })
-    .catch(next);
+    });
 };
 
 // добавление лайка
@@ -51,16 +52,20 @@ const putLike = (req, res, next) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail(new NotFoundError('Запрашиваемая карточка не найдена'))
-    .then((card) => res.send(card))
+    .orFail()
+    .then((card) => {
+      if (card) return res.send({ data: card });
+
+      throw new NotFoundError('Карточка с указанным id не найдена');
+    })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Произошла ошибка при добавлении лайка, переданы некорректные данные'));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new BadRequestError('Переданы некорректные данные при добавлении лайка карточке'));
       } else {
         next(err);
       }
     });
-};
+}
 
 // удаление лайка
 const deleteLike = (req, res, next) => {
