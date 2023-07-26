@@ -76,7 +76,7 @@ const createUser = (req, res, next) => {
     name, about, avatar, email, password,
   } = req.body;
   if (!password || password.length < 4) {
-    throw new NotFoundError('Пароль отсутствует или короче четырех символов');
+    throw new NotFoundError('Пароль отсутствует или короче 4 символов');
   }
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
@@ -91,9 +91,9 @@ const createUser = (req, res, next) => {
       if (err.code === 11000) {
         throw new ConflictError('Пользователь с таким email уже существует');
       } else
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
-      }
+        if (err.name === 'ValidationError') {
+          next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+        }
     })
     .catch(next);
 };
