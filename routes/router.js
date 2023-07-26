@@ -36,11 +36,7 @@ router.post('/signin', celebrate({
 }), login);
 
 // авторизация
-router.use(celebrate({
-  headers: Joi.object().keys({
-    authorization: Joi.string().required(),
-  }).unknown(),
-}), auth);
+router.use(auth);
 
 // роуты, которым авторизация нужна
 router.use('/users', userRouter);
