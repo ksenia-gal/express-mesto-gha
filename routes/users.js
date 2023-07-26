@@ -8,6 +8,7 @@ const {
   changeUserAvatar,
   changeUserInfo,
 } = require('../controllers/users');
+const { REGEX } = require('../utils/constants');
 
 // возвращает всех пользователей из базы данных
 router.get('/', getUsers);
@@ -22,7 +23,7 @@ router.get('/:userId', celebrate({
 // обновляет аватар пользователя
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string(),
+    avatar: Joi.string().pattern(REGEX),
   }),
 }), changeUserAvatar);
 // редактирует данные пользователя
