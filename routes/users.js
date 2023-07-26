@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const { ObjectId } = require('mongoose').Types;
 const { celebrate, Joi } = require('celebrate');
 
 const {
@@ -17,12 +16,7 @@ router.get('/me', getCurrentUser);
 // возвращает пользователя по переданному _id
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string()
-      .required()
-      .custom((value, helpers) => {
-        if (ObjectId.isValid(value)) return value;
-        return helpers.message('Невалидный id');
-      }),
+    userId: Joi.string().required(),
   }),
 }), getUserById);
 // обновляет аватар пользователя
