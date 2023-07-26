@@ -6,7 +6,6 @@ const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 const routes = require('./routes/router');
 const { errorHandler } = require('./middlewares/errorHandler');
-// const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -23,9 +22,6 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
-
-// // логгер запросов
-// app.use(requestLogger);
 
 app.use(routes);
 

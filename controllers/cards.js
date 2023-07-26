@@ -35,14 +35,13 @@ const deleteCard = (req, res, next) => {
       }
       return Card.findByIdAndRemove(req.params.cardId);
     })
-    .then((card) => res.send(card))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new NotFoundError('Произошла ошибка при удалении карточки, переданы некорректные данные'));
-      } else {
-        next(err);
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Карточка уже была удалена');
       }
-    });
+      res.send(card);
+    })
+    .catch(next);
 };
 
 // // добавление лайка
@@ -67,33 +66,33 @@ const deleteCard = (req, res, next) => {
 
 // Лайк на карточки:
 function putLike(req, res, next) {
-  const { cardId } = req.params;
-  const { userId } = req.user;
- 
-  Card
-    .findByIdAndUpdate(
-      cardId,
-      {
-        $addToSet: {
-          likes: userId,
-        },
-      },
-      {
-        new: true,
-      },
-    )
-    .then((card) => {
-      if (card) return res.send({ data: card });
- 
-      throw new NotFoundError('Карточка с указанным id не найдена');
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные при добавлении лайка карточке'));
-      } else {
-        next(err);
-      }
-    });
+  const { cardId } = req.params;
+  const { userId } = req.user;
+
+  Card
+    .findByIdAndUpdate(
+      cardId,
+      {
+        $addToSet: {
+          likes: userId,
+        },
+      },
+      {
+        new: true,
+      },
+    )
+    .then((card) => {
+      if (card) return res.send({ data: card });
+
+      throw new NotFoundError('Карточка с указанным id не найдена');
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new BadRequestError('Переданы некорректные данные при добавлении лайка карточке'));
+      } else {
+        next(err);
+      }
+    });
 }
 
 // удаление лайка
