@@ -17,12 +17,14 @@ router.get('/', getCards);
 router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().custom((value, helpers) => {
+    link: Joi.string()
+    .custom((value, helpers) => {
       if (validator.isURL(value)) return value;
       return helpers.message('Неверный формат ссылки на изображение');
     }),
   }),
 }), createCard);
+
 // удаляет карточку по идентификатору
 router.delete('/:cardId', celebrate({
   params: Joi.object().keys({
