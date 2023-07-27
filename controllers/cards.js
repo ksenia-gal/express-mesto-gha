@@ -35,7 +35,7 @@ const deleteCard = (req, res, next) => {
       }
       Card.deleteOne(card);
     })
-    .then((card) => res.send(card))
+    .then(() => res.send({ message: 'Карточка успешно удалена' }))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new NotFoundError('Произошла ошибка при удалении карточки, переданы некорректные данные'));
