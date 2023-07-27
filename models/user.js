@@ -38,14 +38,12 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: [4, 'Минимальная длина поля "password" - 4'],
       select: false, // чтобы API не возвращал хеш пароля
     },
   },
   { versionKey: false },
 );
 
-// NEW AND NOT READY
 userSchema.statics.findUserByCredentials = function (email, password) {
   // попытаемся найти пользователя по почте
   return this.findOne({ email }).select('+password') // this — это модель User

@@ -19,7 +19,6 @@ router.post('/', celebrate({
     link: Joi.string().required().pattern(REGEX),
   }),
 }), createCard);
-
 // удаляет карточку по идентификатору
 router.delete('/:cardId', celebrate({
   params: Joi.object().keys({

@@ -14,7 +14,7 @@ const getCards = (req, res, next) => {
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.send(card))
+    .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Произошла ошибка при создании новой карточки, переданы некорректные данные');
@@ -33,7 +33,7 @@ const deleteCard = (req, res, next) => {
       if (String(card.owner) !== String(req.user._id)) {
         throw new ForbiddenError('Недостаточно прав');
       }
-      return Card.findByIdAndRemove(req.params.cardId);
+      Card.deleteOne(card);
     })
     .then((card) => res.send(card))
     .catch((err) => {

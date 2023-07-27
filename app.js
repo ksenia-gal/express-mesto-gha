@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
+const limiter = require('./middlewares/limiter');
 const routes = require('./routes/router');
 const { errorHandler } = require('./middlewares/errorHandler');
 
@@ -20,6 +21,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(bodyParser.json());
+
+app.use(limiter);
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 

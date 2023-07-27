@@ -82,7 +82,7 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send({
+    .then((user) => res.status(201).send({
       data: {
         name: user.name, about: user.about, avatar: user.avatar, email: user.email,
       },
@@ -90,12 +90,12 @@ const createUser = (req, res, next) => {
     .catch((err) => {
       if (err.code === 11000) {
         throw new ConflictError('Пользователь с таким email уже существует');
-      } else
-        if (err.name === 'ValidationError') {
-          next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
-        }
-    })
-    .catch(next);
+      } else if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 // обновление аватара пользователя
