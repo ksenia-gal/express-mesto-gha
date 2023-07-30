@@ -4,10 +4,11 @@ const jwt = require('jsonwebtoken');
 const AuthorizationError = require('../errors/unauthorisedError');
 
 const auth = (req, res, next) => {
-  const { token } = req.cookies;
-  if (!token) {
+  const { authorization } = req.headers;
+  if (!authorization || !authorization.startsWith('Bearer ')) {
     return next(new AuthorizationError('Токен остутствует или некорректен'));
   }
+  const token = authorization.replace('Bearer ', '');
   let payload;
   try {
     // попытаемся верифицировать токен
